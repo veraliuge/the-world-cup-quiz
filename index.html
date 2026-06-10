@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover"/>
+<title>World Cup Personality Quiz — NewsBreak</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%E2%9A%BD%3C/text%3E%3C/svg%3E"/>
+<meta name="description" content="Which World Cup legend are you most like? 12 questions. 2 minutes. Discover your World Cup identity."/>
+<meta property="og:type" content="website"/>
+<meta property="og:site_name" content="NewsBreak"/>
+<meta property="og:title" content="World Cup Personality Quiz"/>
+<meta property="og:description" content="Which World Cup legend are you most like? 12 questions. 2 minutes. Discover your World Cup identity."/>
+<meta property="og:image" content="assets/opening.jpg"/>
+<meta name="twitter:card" content="summary_large_image"/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --maxw:480px;
+  --ease:cubic-bezier(.22,1,.36,1);
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%}
+body{
+  background:#0c0c0f;color:#fff;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
+  overflow-x:hidden;-webkit-font-smoothing:antialiased;
+}
+#app{max-width:var(--maxw);margin:0 auto;min-height:100dvh;position:relative;background:#fff;overflow:hidden}
+img{user-select:none;-webkit-user-drag:none}
+
+/* ---------- screen transitions ---------- */
+.screen{position:relative}
+.screen.enter{animation:slideIn .42s var(--ease) both}
+.screen.leaveL{animation:slideOutL .34s var(--ease) both}
+@keyframes slideIn{from{opacity:0;transform:translateX(34px) scale(.985)}to{opacity:1;transform:none}}
+@keyframes slideOutL{from{opacity:1;transform:none}to{opacity:0;transform:translateX(-34px) scale(.985)}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+
+/* ---------- landing (full-bleed) ---------- */
+/* landing = full poster (cover, fills every phone, no white edges) + button over a scrim */
+.landing{position:relative;height:100dvh;height:100svh;overflow:hidden;background:#0c1d12}
+.lbg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center top}
+.scrim{position:absolute;left:0;right:0;bottom:0;height:26%;pointer-events:none;
+  background:linear-gradient(to top, rgba(7,18,10,.62), rgba(7,18,10,0))}
+.startbtn{
+  position:absolute;left:5%;right:5%;bottom:max(50px,calc(env(safe-area-inset-bottom) + 44px));z-index:3;
+  display:flex;align-items:center;justify-content:center;gap:12px;
+  background:#e7242a;color:#fff;border:none;border-radius:44px;padding:18px;
+  font-weight:800;font-size:18px;letter-spacing:.04em;cursor:pointer;
+  box-shadow:0 14px 30px -8px rgba(0,0,0,.5);
+}
+.startbtn::after{content:"";position:absolute;inset:0;border-radius:44px;
+  box-shadow:0 0 0 0 rgba(231,36,42,.5);animation:pulse 2.4s infinite}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(231,36,42,.5)}70%{box-shadow:0 0 0 16px rgba(231,36,42,0)}100%{box-shadow:0 0 0 0 rgba(231,36,42,0)}}
+.startbtn:active{transform:scale(.975)}
+
+/* ---------- question screen: modular, full-bleed, fits every phone ---------- */
+.qscreen{display:flex;flex-direction:column;height:100dvh;height:100svh;background:#fff;
+  padding:max(12px,env(safe-area-inset-top)) 7px max(10px,env(safe-area-inset-bottom));overflow:hidden}
+.qtop{display:flex;align-items:center;gap:10px;flex:0 0 auto;min-height:30px}
+.qtop .nb{height:17px;width:auto}
+.qtop .count{margin-left:auto;font-weight:700;color:#15171c;font-size:14px;letter-spacing:.02em}
+.qprog{display:flex;gap:4px;margin:9px 1px 2px;flex:0 0 auto}
+.qprog i{flex:1;height:4px;border-radius:2px;background:#e8e8eb}
+.qprog i.on{background:#e7242a}
+/* back-to-previous button — sits between progress and the question, clearly labeled */
+.qbackrow{flex:0 0 auto;padding:11px 9px 0}
+.qbk{display:inline-flex;align-items:center;gap:7px;background:#fff;color:#e7242a;
+  border:1.6px solid #e7242a;border-radius:24px;padding:8px 16px 8px 12px;
+  font-weight:800;font-size:14px;letter-spacing:.02em;cursor:pointer;
+  box-shadow:0 3px 10px -4px rgba(231,36,42,.35);transition:transform .12s var(--ease),background .15s}
+.qbk svg{width:18px;height:18px}
+.qbk:active{transform:scale(.96);background:#fdecec}
+.qbody{flex:1 1 auto;display:flex;flex-direction:column;justify-content:flex-start;gap:10px;min-height:0;padding:8px 0 0}
+.qpanel{flex:0 0 auto;padding:0 9px}
+.qpanel img{width:100%;display:block}
+/* cards fill the space below the question: tight on iPhone SE, gently spread on tall phones */
+.qcards{flex:1 1 auto;display:flex;flex-direction:column;justify-content:space-evenly;gap:11px;min-height:0}
+.optc{position:relative;border:none;background:transparent;padding:0;cursor:pointer;display:block;width:100%;
+  transition:transform .13s var(--ease),filter .13s}
+.optc img{width:100%;display:block;border-radius:14px}
+.optc.pressing{transform:scale(.974) translateY(2px);filter:brightness(.985)}
+.optc.sel{transform:translateY(-2px)}
+.optc .chk{position:absolute;top:13%;right:5.5%;width:30px;height:30px;border-radius:50%;
+  background:var(--c);color:#fff;display:grid;place-items:center;font-weight:800;font-size:16px;
+  opacity:0;transform:scale(.4);transition:opacity .22s var(--ease),transform .32s var(--ease);
+  box-shadow:0 4px 13px rgba(0,0,0,.32)}
+.optc.sel .chk{opacity:1;transform:scale(1)}
+@media(hover:hover){.optc:hover{transform:translateY(-2px)}}
+
+/* ---------- result ---------- */
+.result{position:relative;background:var(--panelTop)}
+.hero{position:relative}
+.hero img{display:block;width:100%}
+.share-fab{
+  position:absolute;top:max(10px,env(safe-area-inset-top));right:12px;
+  width:42px;height:42px;border-radius:50%;border:none;cursor:pointer;
+  background:rgba(0,0,0,.32);backdrop-filter:blur(6px);display:grid;place-items:center;
+  color:#fff;transition:transform .15s var(--ease),background .15s;
+}
+.share-fab:active{transform:scale(.9);background:rgba(0,0,0,.5)}
+.panel{
+  position:relative;padding:8px 22px 40px;
+  background:linear-gradient(180deg,var(--panelTop) 0%, var(--panelBot) 60%);
+}
+.sect{margin-top:26px;opacity:0;transform:translateY(16px)}
+.sect.in{animation:secIn .55s var(--ease) forwards}
+@keyframes secIn{to{opacity:1;transform:none}}
+.eyebrow{
+  text-align:center;font-size:12px;letter-spacing:.22em;font-weight:700;
+  color:rgba(255,255,255,.62);margin-bottom:16px;position:relative
+}
+.eyebrow span{background:var(--panelTop);padding:0 14px;position:relative;z-index:1}
+.eyebrow::before{content:"";position:absolute;left:0;right:0;top:50%;height:1px;background:rgba(255,255,255,.16)}
+
+.stat{display:flex;align-items:center;gap:12px;margin:14px 0}
+.stat .lbl{flex:0 0 38%;font-size:13.5px;font-weight:700;letter-spacing:.04em}
+.stat .track{flex:1;height:13px;border-radius:8px;background:rgba(255,255,255,.14);overflow:hidden}
+.stat .fillbar{height:100%;width:0;border-radius:8px;background:var(--accent);
+  transition:width 1.1s var(--ease)}
+.stat .val{flex:0 0 30px;text-align:right;font-weight:800;font-size:16px;font-variant-numeric:tabular-nums}
+
+.special{display:grid;grid-template-columns:1fr 1fr 1fr;gap:0}
+.trait{padding:0 8px;text-align:center;position:relative}
+.trait+.trait::before{content:"";position:absolute;left:0;top:6px;bottom:6px;width:1px;background:rgba(255,255,255,.15)}
+.trait .ic{font-size:24px;margin-bottom:8px;line-height:1}
+.trait .tt{font-weight:800;color:var(--accent);font-size:14px;margin-bottom:6px}
+.trait .td{font-size:11.5px;line-height:1.45;color:rgba(255,255,255,.8)}
+
+.chips{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+.chip{border:1.5px solid var(--accent);color:var(--accent);font-weight:700;font-size:14px;
+  padding:11px 20px;border-radius:30px;background:rgba(255,255,255,.03)}
+
+.cta{
+  display:flex;align-items:center;justify-content:center;gap:10px;width:100%;
+  border:none;cursor:pointer;font-weight:800;font-size:16px;letter-spacing:.02em;
+  padding:17px;border-radius:32px;margin-top:14px;transition:transform .14s var(--ease),filter .14s;
+}
+.cta.primary{background:#e7242a;color:#fff;box-shadow:0 10px 26px -8px rgba(231,36,42,.7)}
+.cta.ghost{background:#fff;color:#15171c}
+.cta:active{transform:scale(.97);filter:brightness(.97)}
+
+/* toast */
+.toast{
+  position:fixed;left:50%;bottom:28px;transform:translateX(-50%) translateY(20px);
+  background:#fff;color:#15171c;font-weight:700;font-size:14px;padding:12px 20px;border-radius:30px;
+  opacity:0;transition:all .3s var(--ease);z-index:50;box-shadow:0 12px 30px rgba(0,0,0,.4);pointer-events:none
+}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* ---------- result: "X% got this result" badge ---------- */
+.resshare{
+  display:flex;align-items:center;justify-content:center;gap:8px;margin:18px auto 0;width:max-content;
+  max-width:90%;background:rgba(255,255,255,.10);border:1px solid rgba(255,255,255,.18);
+  color:#fff;font-weight:700;font-size:13.5px;padding:9px 16px;border-radius:30px;
+  opacity:0;transform:translateY(10px);transition:opacity .5s var(--ease),transform .5s var(--ease);
+}
+.resshare.in{opacity:1;transform:none}
+.resshare b{color:var(--accent);font-weight:800}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<div class="toast" id="toast"></div>
+
+<script>
+/* =========================================================
+   CONFIG — questions, scoring, personalities
+   Dimensions: lead, vis, cre, clu, rel, fla
+   ========================================================= */
+const DIMS = ["lead","vis","cre","clu","rel","fla"];
+
+/* each answer => dimension points [lead,vis,cre,clu,rel,fla]; question N = index+1 */
+const Q = [
+ {a:[{lead:1,clu:2},{vis:2,rel:1},{cre:1,fla:2}]},
+ {a:[{lead:1,clu:2},{vis:2,rel:1},{cre:1,fla:2}]},
+ {a:[{lead:1,clu:2},{lead:2,rel:1},{cre:2,fla:1}]},
+ {a:[{rel:2,lead:1},{fla:2,clu:1},{rel:2,vis:1}]},
+ {a:[{lead:2,rel:1},{vis:2,cre:1},{lead:2,clu:1}]},
+ {a:[{rel:2,vis:1},{fla:2,clu:1},{lead:2,clu:1}]},
+ {a:[{vis:2,rel:1},{lead:2,fla:1},{cre:2,fla:1}]},
+ {a:[{clu:2,lead:1},{clu:2,rel:1},{rel:2,lead:1}]},
+ {a:[{clu:2,lead:1},{lead:2,rel:1},{cre:2,fla:1}]},
+ {a:[{clu:2,lead:1},{rel:2,lead:1},{cre:2,fla:1}]},
+ {a:[{clu:2,lead:1},{vis:2,cre:1},{fla:2,clu:1}]},
+ {a:[{lead:1,clu:2},{rel:2,fla:1},{lead:1,vis:1,cre:1}]}
+];
+
+/* personality affinity weights over dims [lead,vis,cre,clu,rel,fla] */
+const P = {
+ maestro:{ name:"THE MAESTRO", w:{lead:.1,vis:.9,cre:.95,clu:.1,rel:.05,fla:.6},
+   img:"assets/maestro.jpg", seam:[1,14,30], accent:"#ff4d4d",
+   stats:[["VISION",{vis:1}],["PASSING",{vis:.6,rel:.4}],["CREATIVITY",{cre:1}],["LEADERSHIP",{lead:1}]],
+   traits:[["👁","Visionary","You see the whole picture and play with clarity."],
+           ["💡","Playmaker","You create chances others can't see."],
+           ["👑","Leader","You elevate your teammates and make the team better."]],
+   similar:["Xavi","Iniesta","Modrić"] },
+
+ captain:{ name:"THE CAPTAIN", w:{lead:1.15,vis:.15,cre:.1,clu:.4,rel:.35,fla:.15},
+   img:"assets/captain.jpg", seam:[68,5,4], accent:"#ff6363",
+   stats:[["LEADERSHIP",{lead:1}],["DEFENDING",{rel:.6,clu:.4}],["TEAMWORK",{rel:.6,lead:.4}],["COMPOSURE",{rel:1}]],
+   traits:[["🛡️","Reliable","You're the one your team trusts, in every moment."],
+           ["👥","Leader","You inspire and guide everyone around you."],
+           ["🔒","Steady","You stay calm and make the right calls under pressure."]],
+   similar:["Maldini","Ramos","Puyol"] },
+
+ clutch:{ name:"THE CLUTCH HERO", w:{lead:.3,vis:.1,cre:.1,clu:1.2,rel:.2,fla:.45},
+   img:"assets/clutch.jpg", seam:[150,55,8], accent:"#ffd2a6",
+   stats:[["MENTALITY",{clu:.6,rel:.4}],["FINISHING",{clu:1}],["CLUTCH",{clu:.7,fla:.3}],["SPEED",{clu:.5,fla:.5}]],
+   traits:[["🎯","Clutch","You step up when it matters most and deliver the goods."],
+           ["✊","Determined","You never give up. You fight until the final whistle."],
+           ["🔥","Fearless","You embrace pressure and aren't afraid of the big moments."]],
+   similar:["Mbappé","Ronaldo","Bale"] },
+
+ creator:{ name:"THE CREATOR", w:{lead:.3,vis:1.0,cre:.5,clu:.1,rel:.7,fla:.05},
+   img:"assets/creator.jpg", seam:[39,16,65], accent:"#c4a3ff",
+   stats:[["CREATIVITY",{cre:1}],["VISION",{vis:1}],["PASSING",{vis:.6,rel:.4}],["TECHNIQUE",{cre:.6,fla:.4}]],
+   traits:[["💡","Creative","You turn ideas into magic on the pitch."],
+           ["👁","Visionary","You see the play before it happens."],
+           ["🏃","Playmaker","You unlock defenses and create chances."]],
+   similar:["Pirlo","Xabi Alonso","Kroos"] },
+
+ guardian:{ name:"THE GUARDIAN", w:{lead:.15,vis:.3,cre:.05,clu:.5,rel:1.32,fla:.05},
+   img:"assets/guardian.jpg", seam:[2,40,35], accent:"#5fd6bb",
+   stats:[["REFLEXES",{rel:.6,clu:.4}],["FOCUS",{rel:1}],["POSITIONING",{rel:.6,vis:.4}],["MENTALITY",{rel:.6,clu:.4}]],
+   traits:[["🧤","Reliable","You're the last line of defense. Your team trusts you."],
+           ["🏆","Game Saver","You rise in the big moments and change the game."],
+           ["🔥","Fearless","You face every shot with courage and confidence."]],
+   similar:["Buffon","Casillas","Neuer"] },
+
+ wildcard:{ name:"THE WILDCARD", w:{lead:.1,vis:.2,cre:.85,clu:.2,rel:.1,fla:1.15},
+   img:"assets/wildcard.jpg", seam:[71,96,21], accent:"#c4e86a",
+   stats:[["CREATIVITY",{cre:1}],["DRIBBLING",{fla:.6,cre:.4}],["UNPREDICTABILITY",{fla:1}],["FLAIR",{fla:.7,cre:.3}]],
+   traits:[["✨","Unstoppable","You break the rhythm and leave defenders behind."],
+           ["🎩","Game Changer","You turn the game around with a moment of brilliance."],
+           ["🔥","Fearless","You take risks others won't, and enjoy every second of it."]],
+   similar:["Neymar","Ronaldinho","Okocha"] }
+};
+const PRIORITY = ["clutch","wildcard","maestro","creator","captain","guardian"];
+
+/* max achievable per dim (for normalization) */
+const DIM_MAX = (()=>{ const m={}; DIMS.forEach(d=>m[d]=0);
+  Q.forEach(q=>{ DIMS.forEach(d=>{ const best=Math.max(0,...q.a.map(o=>o[d]||0)); m[d]+=best; }); });
+  return m; })();
+
+/* =========================================================
+   ENGINE
+   ========================================================= */
+const state={ q:0, answers:[] };
+
+function record(qi, oi){ state.answers[qi]=oi; }   // totals derived from answers -> back/edit safe
+function totals(){
+  const t=Object.fromEntries(DIMS.map(d=>[d,0]));
+  state.answers.forEach((oi,qi)=>{ if(oi==null)return; const pts=Q[qi].a[oi]; for(const d in pts) t[d]+=pts[d]; });
+  return t;
+}
+function norm(){ const t=totals(),n={}; DIMS.forEach(d=>n[d]= DIM_MAX[d]? t[d]/DIM_MAX[d] : 0); return n; }
+
+/* ---------- result crowd share (reuses Memorial Day's Apps Script counter) ----------
+   Each finished quiz increments WCQ_RES_<personality>; the result page shows the % of
+   players who got that result — mock until total results reach REAL_THRESHOLD, then real. */
+const COUNTER_API='https://script.google.com/macros/s/AKfycbyTStprTKUWCqMlbUUu55POXNvtt3e1ZoNg0JZcX1E_eobckDGc_jIIo2x6Uics6JE/exec';
+const REAL_THRESHOLD=50;
+const RES_MOCK={maestro:12,captain:22,clutch:14,creator:20,guardian:11,wildcard:21};  // ~uniform-combo distribution
+const resCounts={};
+const RKEY=(key)=>'WCQ_RES_'+key;
+function fetchCounts(){
+  const cb='__wcq'+Date.now()+Math.floor(Math.random()*1e3);
+  const s=document.createElement('script');
+  const done=()=>{ try{delete window[cb];}catch(e){} if(s.parentNode)s.remove(); };
+  window[cb]=(data)=>{ try{
+    const h=(data&&data.heroes)||{};
+    for(const k in P) resCounts[k]=Number(h[RKEY(k)])||0;
+  }finally{done();} };
+  s.onerror=done; s.src=COUNTER_API+'?callback='+cb+'&_='+Date.now(); document.head.appendChild(s);
+}
+let postedResult=false;
+function postResult(key){
+  if(postedResult)return; postedResult=true;
+  try{ fetch(COUNTER_API,{method:'POST',mode:'no-cors',body:new URLSearchParams({action:'hero',id:RKEY(key)})}); }catch(e){}
+}
+function resultPct(key){
+  const total=Object.values(resCounts).reduce((a,b)=>a+(b||0),0);
+  if(total>=REAL_THRESHOLD) return Math.max(1,Math.round((resCounts[key]||0)/total*100));
+  return RES_MOCK[key]||10;
+}
+
+function decide(){
+  const n=norm(); let best=null,bestS=-1;
+  for(const key of PRIORITY){
+    const w=P[key].w; let s=0; for(const d in w) s+=w[d]*n[d];
+    if(s>bestS){bestS=s;best=key;}
+  }
+  return best;
+}
+function statValues(key){
+  const n=norm(), p=P[key];
+  let raws=p.stats.map(([_,blend])=>{
+    let num=0,den=0; for(const d in blend){num+=blend[d]*n[d];den+=blend[d];}
+    const sn=den?num/den:0; return 80+sn*19;            // 80..99
+  });
+  raws.sort((a,b)=>b-a);                                 // aspirational descending
+  let mx=raws[0]; if(mx<92){const add=92-mx; raws=raws.map(v=>Math.min(99,v+add));}
+  return raws.map(v=>Math.max(80,Math.min(99,Math.round(v))));
+}
+
+/* =========================================================
+   SOUND (Web Audio, synthesized — no assets)
+   ========================================================= */
+let AC=null;
+function ac(){ if(!AC){ try{AC=new (window.AudioContext||window.webkitAudioContext)();}catch(e){} } if(AC&&AC.state==="suspended")AC.resume(); return AC; }
+function tone(freq,dur,type="sine",vol=.09,delay=0){
+  const c=ac(); if(!c)return;
+  const o=c.createOscillator(),g=c.createGain(),t=c.currentTime+delay;
+  o.type=type;o.frequency.setValueAtTime(freq,t);
+  g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(vol,t+.008);
+  g.gain.exponentialRampToValueAtTime(.0001,t+dur);
+  o.connect(g);g.connect(c.destination);o.start(t);o.stop(t+dur+.02);
+}
+const sfxPress =()=>tone(330,.06,"triangle",.05);
+const sfxClick =()=>{tone(540,.05,"square",.04);};
+const sfxSelect=()=>{tone(523,.09,"sine",.08);tone(784,.13,"sine",.07,.06);};
+const sfxReveal=()=>{[523,659,784,1047].forEach((f,i)=>tone(f,.5,"sine",.06,i*.12));};
+
+/* =========================================================
+   RENDER
+   ========================================================= */
+const app=document.getElementById("app");
+function swap(node){
+  const old=app.firstElementChild;
+  if(old){ old.classList.add("leaveL"); setTimeout(()=>old.remove(),320); }
+  node.classList.add("screen","enter");
+  app.appendChild(node);
+  window.scrollTo(0,0);
+}
+const el=(t,c,h)=>{const e=document.createElement(t);if(c)e.className=c;if(h!=null)e.innerHTML=h;return e;};
+const shareSvg=(s)=>`<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.6" y1="13.5" x2="15.4" y2="17.5"/><line x1="15.4" y1="6.5" x2="8.6" y2="10.5"/></svg>`;
+
+/* ---- Landing (full-bleed cover + recreated START button) ---- */
+function renderLanding(){
+  const s=el("div","landing");
+  s.innerHTML=`<img class="lbg" src="assets/opening.jpg" alt="World Cup Personality Quiz">
+    <div class="scrim"></div>
+    <button class="startbtn" aria-label="Start the quiz">START THE QUIZ
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="12" x2="19" y2="12"/><polyline points="13 6 19 12 13 18"/></svg></button>`;
+  s.querySelector(".startbtn").onclick=()=>{ ac(); sfxSelect(); start(); };
+  swap(s);
+}
+function start(){ state.q=0; state.answers=[]; postedResult=false; renderQuestion(); }
+
+/* ---- Question (modular: top bar + question panel + 3 card images) ---- */
+function renderQuestion(){
+  const qi=state.q, qn=qi+1;
+  const s=el("div","qscreen");
+
+  // top bar: logo · counter
+  const top=el("div","qtop");
+  const logo=el("img","nb"); logo.src="assets/nb-logo.png"; logo.alt="NewsBreak"; top.appendChild(logo);
+  top.appendChild(el("div","count",qn+" / 12"));
+  s.appendChild(top);
+
+  // progress
+  const prog=el("div","qprog");
+  for(let i=0;i<12;i++) prog.appendChild(el("i", i<=qi?"on":""));
+  s.appendChild(prog);
+
+  // back-to-previous (between progress and question) — clearly labeled
+  if(qi>0){
+    const bkrow=el("div","qbackrow");
+    const bk=el("button","qbk"); bk.setAttribute("aria-label","Back to previous question");
+    bk.innerHTML=`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="6" y2="12"/><polyline points="12 5 6 12 12 19"/></svg> Previous`;
+    bk.onclick=()=>{ ac(); sfxClick(); state.q--; renderQuestion(); };
+    bkrow.appendChild(bk); s.appendChild(bkrow);
+  }
+
+  // body = question panel (text + scene) + option cards, centered as one block
+  const body=el("div","qbody");
+  const panel=el("div","qpanel");
+  const pim=el("img"); pim.src=`assets/q/q${qn}_panel.jpg`; pim.alt="Question "+qn; panel.appendChild(pim);
+  body.appendChild(panel);
+
+  // option cards
+  const cards=el("div","qcards");
+  const COLORS=["#e0241f","#f0a500","#1f9d4d"];
+  const prev=state.answers[qi]; let locked=false; const opts=[];
+  ["a","b","c"].forEach((ltr,oi)=>{
+    const b=el("button","optc"); opts.push(b); b.style.setProperty("--c",COLORS[oi]);
+    b.innerHTML=`<img src="assets/q/q${qn}_${ltr}.jpg" alt=""><span class="chk">✓</span>`;
+    const down=()=>{ if(locked)return; b.classList.add("pressing"); ac(); sfxPress(); };
+    const up  =()=>{ b.classList.remove("pressing"); };
+    b.addEventListener("pointerdown",down);
+    b.addEventListener("pointerup",up);
+    b.addEventListener("pointerleave",up);
+    b.addEventListener("pointercancel",up);
+    b.onclick=()=>{
+      if(locked)return; locked=true;
+      opts.forEach(o=>o.classList.remove("sel"));
+      b.classList.remove("pressing"); b.classList.add("sel"); sfxSelect();
+      record(qi,oi);
+      setTimeout(()=>{ if(state.q<11){ state.q++; renderQuestion(); } else renderResult(); }, 600);
+    };
+    if(prev===oi) b.classList.add("sel");              // pre-highlight prior choice when revisiting
+    cards.appendChild(b);
+  });
+  body.appendChild(cards);
+  s.appendChild(body);
+  swap(s);
+}
+
+/* ---- Result ---- */
+function darker(rgb,f=.45){return `rgb(${Math.round(rgb[0]*f)},${Math.round(rgb[1]*f)},${Math.round(rgb[2]*f)})`;}
+function renderResult(){
+  const key=decide(), p=P[key], vals=statValues(key);
+  postResult(key);                       // count this result for the crowd-share stat
+  prefetchCard(key);                     // warm the share card so the share carries the image
+  const seamC=`rgb(${p.seam.join(",")})`;
+  const s=el("div","result");
+  s.style.cssText=`--accent:${p.accent};--panelTop:${seamC};--panelBot:${darker(p.seam,.4)}`;
+
+  const hero=el("div","hero");
+  const himg=el("img"); himg.src=p.img; himg.alt=p.name;
+  const fab=el("button","share-fab");
+  fab.innerHTML=shareSvg(20);
+  fab.onclick=()=>share(p,key);
+  hero.appendChild(himg); hero.appendChild(fab);
+
+  const panel=el("div","panel");
+
+  /* crowd share — "X% got this result" */
+  const share=el("div","resshare",
+    `<span>🔥</span><span><b>${resultPct(key)}%</b> of players are ${p.name}</span>`);
+  panel.appendChild(share);
+
+  /* stats */
+  const stats=el("div","sect");
+  stats.innerHTML=`<div class="eyebrow"><span>YOUR RATING</span></div>`;
+  p.stats.forEach(([lbl],i)=>{
+    const row=el("div","stat",
+      `<div class="lbl">${lbl}</div><div class="track"><div class="fillbar"></div></div><div class="val">0</div>`);
+    stats.appendChild(row);
+  });
+  panel.appendChild(stats);
+
+  /* what makes you special */
+  const sp=el("div","sect");
+  sp.innerHTML=`<div class="eyebrow"><span>WHAT MAKES YOU SPECIAL</span></div>`;
+  const grid=el("div","special");
+  p.traits.forEach(([ic,tt,td])=>grid.appendChild(el("div","trait",
+    `<div class="ic">${ic}</div><div class="tt">${tt}</div><div class="td">${td}</div>`)));
+  sp.appendChild(grid); panel.appendChild(sp);
+
+  /* similar style */
+  const sim=el("div","sect");
+  sim.innerHTML=`<div class="eyebrow"><span>SIMILAR STYLE</span></div>`;
+  const chips=el("div","chips");
+  p.similar.forEach(nm=>chips.appendChild(el("div","chip",nm)));
+  sim.appendChild(chips); panel.appendChild(sim);
+
+  /* CTAs */
+  const cta=el("div","sect");
+  const shareBtn=el("button","cta primary",
+    `${shareSvg(18)} SHARE MY RESULT`);
+  shareBtn.onclick=()=>share(p,key);
+  const againBtn=el("button","cta ghost",
+    `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg> TAKE AGAIN`);
+  againBtn.onclick=()=>{ ac(); sfxClick(); renderLanding(); };
+  cta.appendChild(shareBtn); cta.appendChild(againBtn);
+  panel.appendChild(cta);
+
+  s.appendChild(hero); s.appendChild(panel);
+  swap(s);
+
+  /* progressive reveal + animate stats */
+  sfxReveal();
+  setTimeout(()=>share.classList.add("in"), 180);
+  const sects=panel.querySelectorAll(".sect");
+  sects.forEach((sec,i)=>setTimeout(()=>sec.classList.add("in"), 360+i*230));
+  setTimeout(()=>{
+    const rows=stats.querySelectorAll(".stat");
+    rows.forEach((row,i)=>{
+      const v=vals[i];
+      const bar=row.querySelector(".fillbar"), num=row.querySelector(".val");
+      setTimeout(()=>{ bar.style.width=v+"%"; countTo(num,v,1000); }, i*140);
+    });
+  },520);
+}
+function countTo(node,target,dur){
+  const t0=performance.now();
+  function step(t){ const k=Math.min(1,(t-t0)/dur); node.textContent=Math.round(target*(0.2+0.8*k*(2-k))); if(k<1)requestAnimationFrame(step); else node.textContent=target; }
+  requestAnimationFrame(step);
+}
+
+/* ---- Share (card + link — reuses Memorial Day's unifiedShare cascade) ---- */
+function toast(msg){ const t=document.getElementById("toast"); t.textContent=msg; t.classList.add("show"); setTimeout(()=>t.classList.remove("show"),1900); }
+
+/* pre-fetch the personality result card as a File so the share carries the card image */
+const cardFiles={};
+async function prefetchCard(key){
+  if(!key || cardFiles[key]) return;
+  try{
+    const res=await fetch("assets/share/"+key+".jpg",{cache:"force-cache"});
+    if(!res.ok) return;
+    const blob=await res.blob();
+    cardFiles[key]=new File([blob], "world-cup-"+key+".jpg", {type: blob.type||"image/jpeg"});
+  }catch(e){}
+}
+const cardFilesFor=key=> cardFiles[key] ? [cardFiles[key]] : null;
+
+/* card image first, then URL-only native panel, then clipboard, then legacy copy */
+async function unifiedShare(payload, fallbackToast){
+  fallbackToast=fallbackToast||"Link copied to clipboard";
+  const url=payload.url, text=payload.text||"", title=payload.title||"", files=payload.files;
+  const shareData={title,text,url};
+  if(navigator.share && files && files.length && navigator.canShare){
+    const wf={title,text,url,files};
+    if(navigator.canShare(wf)){
+      try{ await navigator.share(wf); return; }
+      catch(e){ if(e&&(e.name==="AbortError"||/cancel/i.test(e.message||""))) return; }
+    }
+  }
+  if(navigator.share){
+    try{
+      if(navigator.canShare && !navigator.canShare(shareData)) throw new Error("canShare false");
+      await navigator.share(shareData); return;
+    }catch(e){ if(e&&(e.name==="AbortError"||/cancel/i.test(e.message||""))) return; }
+  }
+  const shareText=(text?text+" ":"")+url;
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    try{ await navigator.clipboard.writeText(shareText); toast(fallbackToast); return; }catch(e){}
+  }
+  try{
+    const ta=document.createElement("textarea"); ta.value=shareText;
+    ta.style.position="fixed"; ta.style.left="-9999px"; ta.setAttribute("readonly","");
+    document.body.appendChild(ta); ta.select(); ta.setSelectionRange(0,ta.value.length);
+    document.execCommand("copy"); document.body.removeChild(ta); toast(fallbackToast);
+  }catch(e){ toast("Screenshot this card to share!"); }
+}
+
+function share(p, key){
+  ac(); sfxClick();
+  const url=location.href.split("#")[0];
+  const text=`I'm ${p.name} ⚽ Which World Cup legend are you? Take the NewsBreak quiz:`;
+  unifiedShare({title:"World Cup Personality Quiz", text, url, files:cardFilesFor(key)},
+               "Link copied — paste to share!");
+}
+
+/* boot */
+fetchCounts();
+renderLanding();
+</script>
+</body>
+</html>
